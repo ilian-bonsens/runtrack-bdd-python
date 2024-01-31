@@ -3,7 +3,7 @@ import mysql.connector
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="/5$JGF1d:yfTWKyJ",
+    password="***********",
     database="job7"
 )
 

@@ -3,7 +3,7 @@ import mysql.connector
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="/5$JGF1d:yfTWKyJ",
+    password="*********",
     database="zoo"
 )
 
@@ -14,14 +14,24 @@ class Zoo:
         self.mydb = mydb
         self.cursor = cursor
 
-    def add_animal(self):
-        self.cursor.execute("INSERT INTO animal (nom, race, date_de_naissance, pays_origine, id_type_cage) VALUES ('Nibi', 'Tigre du Bengal', '2020-02-01', 'Inde', 4)")
-        self.cursor.execute("INSERT INTO animal (nom, race, date_de_naissance, pays_origine, id_type_cage) VALUES ('Vitinha', 'Chevre', '1999-06-07', 'Portugal', 1)")
-        self.cursor.execute("INSERT INTO animal (nom, race, date_de_naissance, pays_origine, id_type_cage) VALUES ('Vitinha', 'Chevre', '1999-06-07', 'Portugal', 1)")
+    def add_animal(self, nom, race, date_de_naissance, pays_origine, id_type_cage):
+        self.cursor.execute("INSERT INTO animal (nom, race, date_de_naissance, pays_origine, id_type_cage) VALUES (%s, %s, %s, %s, %s)", (nom, race, date_de_naissance, pays_origine, id_type_cage))
 
-    def cage(self):
-        self.cursor.execute("INSERT INTO cage (superficie, capacite, animaux) VALUES (40, 2, 2)")
-        
+    def delete_animal(self, id):
+        self.cursor.execute("DELETE FROM animal WHERE id = %s", (id,))
+
+    def modify_animal(self, id, nom, race, date_de_naissance, pays_origine, id_type_cage):
+        self.cursor.execute("UPDATE animal SET nom = %s, race = %s, date_de_naissance = %s, pays_origine = %s, id_type_cage = %s WHERE id = %s", (nom, race, date_de_naissance, pays_origine, id_type_cage, id))
+
+    def add_cage(self, id, superficie, capacite_max, animaux, capacite):
+        self.cursor.execute("INSERT INTO cage (id, superficie, capacite_max, animaux, capacite) VALUES (%s, %s, %s, %s, %s)", (id, superficie, capacite_max, animaux, capacite))
+
+    def delete_cage(self, id):
+        self.cursor.execute("DELETE FROM cage WHERE id = %s", (id,))
+
+    def modify_cage(self, id, superficie, capacite_max, animaux, capacite):
+        self.cursor.execute("UPDATE cage SET superficie = %s, capacite_max = %s, animaux = %s, capacite = %s WHERE id = %s", (superficie, capacite_max, animaux, capacite, id))
+
     def show_animal(self):
         self.cursor.execute("SELECT * from animal")
         results = self.cursor.fetchall()
@@ -34,12 +44,27 @@ class Zoo:
         for row in results_cage:  
             print(row)
 
+    def calculate_total_cage_area(self):
+        self.cursor.execute("SELECT SUM(superficie) FROM cage")
+        total_area = self.cursor.fetchall()[0][0]
+        return total_area
+
 zoo = Zoo(mydb, cursor)
-zoo.add_animal()
-zoo.cage()
+
+zoo.add_animal('Nibi', 'Tigre du Bengal', '2020-02-01', 'Inde', 1)
+zoo.add_animal('Simba', 'Lion', '2018-05-10', 'Afrique du Sud', 2)
+zoo.add_animal('Baloo', 'Ours brun', '2015-07-20', 'Canada', 3)
+
+zoo.add_cage(1, 40, 2, 1, 2)
+zoo.add_cage(2, 30, 1, 2, 1)
+zoo.add_cage(3, 50, 3, 3, 3)
+
+print("Liste des animaux :")
 zoo.show_animal()
+print("Liste des cages :")
 zoo.show_cage()
+
+print("Superficie totale des cages :", zoo.calculate_total_cage_area())
 
 cursor.close()
 mydb.close()
-
